@@ -812,39 +812,6 @@ const AnalyticsDashboard = ({ roadmap }) => {
         <PostRoadmapAnalysis postAnalysis={roadmap.postAnalysis} />
       )}
 
-      {/* Quick Actions */}
-      <div className="bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] p-6 rounded-xl border border-neutral-800/60">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Zap size={18} className="text-yellow-400" />
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <button className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-left hover:bg-blue-500/20 transition-colors group">
-            <div className="flex items-center gap-3">
-              <Calendar size={20} className="text-blue-400" />
-              <div>
-                <div className="font-medium text-white group-hover:text-blue-300">
-                  Schedule Study
-                </div>
-                <div className="text-xs text-neutral-400">Set reminders</div>
-              </div>
-            </div>
-          </button>
-          <button className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-left hover:bg-green-500/20 transition-colors group">
-            <div className="flex items-center gap-3">
-              <Users size={20} className="text-green-400" />
-              <div>
-                <div className="font-medium text-white group-hover:text-green-300">
-                  Find Study Group
-                </div>
-                <div className="text-xs text-neutral-400">
-                  Connect with peers
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
