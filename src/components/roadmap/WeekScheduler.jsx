@@ -81,10 +81,10 @@ export default function WeekScheduler({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="overflow-hidden"
+            className="overflow-hidden mt-6"
           >
-            <div className="p-6 pt-0">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-6 pt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {tasks.map((task, taskIndex) => (
                   <SchedulerCard
                     key={taskIndex}

@@ -6,9 +6,7 @@ import "./globals.css";
 import CyberpunkScanlines from "@/components/UI/CyberPunkScanLines"; // Corrected casing
 import NeonCursorTrail from "@/components/UI/NeonCursorTrail";
 import { AuthProvider } from '@/context/AuthContext';
-
-// Import the new client component directly
-import ClientFaviconHandler from "@/components/ClientFaviconHandler";
+import ClientLayout from '@/components/ClientLayout';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,11 +47,9 @@ export default function RootLayout({ children }) {
         {/* <link rel="icon" href="/favicon.ico" sizes="any" /> */}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-gray-100 overflow-x-hidden`}>
-        {/* Render ClientFaviconHandler inside the <body> */}
-        <ClientFaviconHandler />
-        <CyberpunkScanlines />
-        {/* <NeonCursorTrail /> */}
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );
