@@ -8,38 +8,113 @@ import {
   Bar,
   XAxis,
   YAxis,
+  AreaChart,
+  Area,
 } from "recharts";
-import { BarChartHorizontal, Calendar, Zap, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  BarChartHorizontal,
+  Calendar,
+  Target,
+  Award,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import ResumeAnalysisSection from "./ResumeAnalysisSection";
 import PostRoadmapAnalysis from "./PostRoadmapAnalysis";
+import { getRoadmapProgress, getWeeklySchedule } from "@/lib/roadmapUtils";
+
+const StatsCard = ({ icon: Icon, title, value, subtitle, delay = 0 }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, delay }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      className="p-4 rounded-xl border border-neutral-800/60 bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] backdrop-blur-xl transition-all duration-300 group"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <motion.div
+          className="p-2 rounded-lg bg-blue-500/20 border border-blue-500/30"
+          whileHover={{ rotate: 10, scale: 1.1 }}
+        >
+          <Icon size={20} className="text-blue-400" />
+        </motion.div>
+      </div>
+
+      <motion.div
+        className="text-2xl font-bold text-white mb-1"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: delay + 0.2, type: "spring", stiffness: 200 }}
+      >
+        {value}
+      </motion.div>
+
+      <div className="text-sm text-neutral-400 font-medium">{title}</div>
+      {subtitle && (
+        <div className="text-xs text-neutral-500 mt-1">{subtitle}</div>
+      )}
+    </motion.div>
+  );
+};
+
+const ProgressRing = ({ progress, size = 120, strokeWidth = 8 }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="rgba(59, 130, 246, 0.1)"
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#3b82f6"
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: progress / 100 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          style={{
+            strokeDasharray: circumference,
+            strokeDashoffset: circumference - (progress / 100) * circumference,
+          }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <motion.div
+          className="text-center"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.5, type: "spring" }}
+        >
+          <div className="text-2xl font-bold text-white">{progress}%</div>
+          <div className="text-xs text-neutral-400">Complete</div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
 
 export default function AnalyticsDashboard({ roadmap }) {
+  const weeklySchedule = getWeeklySchedule(roadmap);
   const allTasks = roadmap.timeline
     .filter((i) => i.type === "module")
     .flatMap((m) => m.tasks);
   const completedTasks = allTasks.filter((t) => t.completed);
-  const progress =
-    allTasks.length > 0
-      ? Math.round((completedTasks.length / allTasks.length) * 100)
-      : 0;
-
-  const weeklyProgress = roadmap.timeline
-    .filter((item) => item.type === "module")
-    .map((module) => {
-      const completed = module.tasks.filter((t) => t.completed).length;
-      const total = module.tasks.length;
-      return {
-        week: `W${module.week}`,
-        progress: total > 0 ? Math.round((completed / total) * 100) : 0,
-        completed,
-        total,
-      };
-    });
-
-  const chartData = [
-    { name: "Completed", value: progress, color: "#22d3ee" },
-    { name: "Remaining", value: 100 - progress, color: "#374151" },
-  ];
+  const allMilestones = roadmap.timeline.filter((i) => i.type === "milestone");
+  const completedMilestones = allMilestones.filter((m) => m.completed);
+  const progress = getRoadmapProgress(roadmap, completedTasks, completedMilestones);
 
   return (
     <div className="space-y-8">
@@ -47,94 +122,103 @@ export default function AnalyticsDashboard({ roadmap }) {
       <ResumeAnalysisSection resumeInsights={roadmap.resumeInsights} />
 
       {/* Progress Overview */}
-      <div className="bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] p-6 rounded-xl border border-neutral-800/60">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] p-6 rounded-xl border border-neutral-800/60"
+      >
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
             <BarChartHorizontal size={20} className="text-blue-400" />
-            Progress Analytics
-          </h3>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-sm text-neutral-400">Overall Progress</span>
           </div>
+          <h3 className="text-xl font-bold text-white">Progress Analytics</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Circular Progress */}
-          <div className="relative">
-            <div className="w-48 h-48 mx-auto">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-3xl font-bold text-white">
-                    {progress}%
-                  </span>
-                  <p className="text-xs text-neutral-400 mt-1">Complete</p>
-                </div>
-              </div>
-            </div>
+          <div className="flex justify-center">
+            <ProgressRing progress={progress} />
           </div>
 
           {/* Stats Grid */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-blue-400">
-                  {completedTasks.length}
-                </div>
-                <div className="text-sm text-neutral-400">Tasks Done</div>
-              </div>
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-green-400">
-                  {allTasks.length - completedTasks.length}
-                </div>
-                <div className="text-sm text-neutral-400">Remaining</div>
-              </div>
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-yellow-400">7</div>
-                <div className="text-sm text-neutral-400">Weeks</div>
-              </div>
-              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-purple-400">6h</div>
-                <div className="text-sm text-neutral-400">Per Week</div>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <StatsCard
+              icon={Target}
+              title="Tasks Done"
+              value={completedTasks.length}
+              subtitle={`${allTasks.length - completedTasks.length} remaining`}
+              delay={0}
+            />
+            <StatsCard
+              icon={Clock}
+              title="Total Weeks"
+              value={weeklySchedule.length}
+              subtitle="Learning path"
+              delay={0.1}
+            />
+            <StatsCard
+              icon={TrendingUp}
+              title="Progress"
+              value={`${progress}%`}
+              subtitle="Completed"
+              delay={0.2}
+            />
+            <StatsCard
+              icon={Award}
+              title="Per Week"
+              value={roadmap.weeklyCommitment || "6h"}
+              subtitle="Study time"
+              delay={0.3}
+            />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Weekly Progress Chart */}
-      <div className="bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] p-6 rounded-xl border border-neutral-800/60">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Calendar size={18} className="text-green-400" />
-          Weekly Breakdown
-        </h3>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] p-6 rounded-xl border border-neutral-800/60"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Calendar size={18} className="text-blue-400" />
+          </div>
+          <h3 className="text-lg font-bold text-white">Weekly Breakdown</h3>
+        </div>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weeklyProgress}>
-              <XAxis dataKey="week" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Bar dataKey="progress" fill="#22d3ee" radius={[4, 4, 0, 0]} />
-            </BarChart>
+            <AreaChart data={weeklySchedule.map(w => ({
+              week: `Week ${w.week}`,
+              progress: w.tasks.length > 0 ? Math.round(w.tasks.filter(t => t.completed).length / w.tasks.length * 100) : 0
+            }))}>
+              <defs>
+                <linearGradient
+                  id="progressGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="week" stroke="#6b7280" fontSize={12} />
+              <YAxis stroke="#6b7280" fontSize={12} />
+              <Area
+                type="monotone"
+                dataKey="progress"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                fill="url(#progressGradient)"
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </motion.div>
 
       {/* Post Roadmap Analysis */}
       {roadmap.postAnalysis && (

@@ -17,20 +17,22 @@ import {
   Timer,
   Layers,
   ExternalLink,
+  ChevronRight,
+  Target,
 } from "lucide-react";
 
 const getIcon = (type) => {
   switch (type) {
     case "course":
-      return <Book size={18} className="text-blue-400" />;
+      return <Book size={16} className="text-blue-400" />;
     case "video":
-      return <Youtube size={18} className="text-red-400" />;
+      return <Youtube size={16} className="text-red-400" />;
     case "article":
-      return <Lightbulb size={18} className="text-yellow-400" />;
+      return <Lightbulb size={16} className="text-yellow-400" />;
     case "project":
-      return <FolderKanban size={18} className="text-green-400" />;
+      return <FolderKanban size={16} className="text-green-400" />;
     default:
-      return <Circle size={18} className="text-neutral-500" />;
+      return <Circle size={16} className="text-neutral-500" />;
   }
 };
 
@@ -55,9 +57,7 @@ const StatusBadge = ({ status, className = "" }) => {
       case "in-progress":
         return "bg-blue-500/20 text-blue-300 border-blue-500/40";
       case "pending":
-        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/40";
-      case "blocked":
-        return "bg-red-500/20 text-red-300 border-red-500/40";
+        return "bg-neutral-500/20 text-neutral-300 border-neutral-500/40";
       default:
         return "bg-neutral-500/20 text-neutral-300 border-neutral-500/40";
     }
@@ -65,7 +65,7 @@ const StatusBadge = ({ status, className = "" }) => {
 
   return (
     <span
-      className={`px-2 py-1 text-xs rounded-full border ${getStatusStyles(status)} ${className}`}
+      className={`px-2 py-1 text-xs rounded-full border font-medium ${getStatusStyles(status)} ${className}`}
     >
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
@@ -80,8 +80,8 @@ export default function SchedulerCard({
   isHighlighted = false,
 }) {
   const [showDetails, setShowDetails] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [timeSpent, setTimeSpent] = useState(task.timeSpent || 0);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [noteValue, setNoteValue] = useState(task.note || "");
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -92,8 +92,8 @@ export default function SchedulerCard({
       transition: { delay: index * 0.1, duration: 0.4, ease: "easeOut" },
     },
     hover: {
-      y: -2,
-      scale: 1.02,
+      y: -3,
+      scale: 1.01,
       transition: { duration: 0.2 },
     },
   };
@@ -105,64 +105,60 @@ export default function SchedulerCard({
       animate="visible"
       whileHover="hover"
       className={`
-        relative overflow-hidden rounded-xl border transition-all duration-300
+        relative overflow-hidden rounded-lg border transition-all duration-300 group
         ${
           isHighlighted
-            ? "bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-orange-500/10 border-yellow-500/40 shadow-lg shadow-yellow-500/10"
+            ? "bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-orange-500/10 border-yellow-500/50"
             : "bg-gradient-to-br from-[#161b22] via-[#1a2028] to-[#1e242c] border-neutral-800/60 hover:border-blue-500/40"
         }
-        hover:shadow-xl hover:shadow-blue-500/10 group
+        hover:shadow-lg hover:shadow-blue-500/10
       `}
     >
       {/* Progress bar at top */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-neutral-800/50">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-neutral-800/50">
         <motion.div
           className={`h-full ${task.completed ? "bg-green-500" : "bg-blue-500"}`}
           initial={{ width: 0 }}
           animate={{
-            width: task.completed
-              ? "100%"
-              : `${(timeSpent / parseInt(task.time)) * 100}%`,
+            width: task.completed ? "100%" : "0%",
           }}
           transition={{ duration: 0.5, delay: 0.2 }}
         />
       </div>
 
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-4 flex-1">
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-start gap-3 flex-1">
             <button
               onClick={onToggle}
-              className={`flex-shrink-0 mt-1 transition-all duration-200 ${
+              className={`flex-shrink-0 transition-all duration-200 ${
                 task.completed
                   ? "text-green-500 hover:text-green-400"
                   : "text-neutral-500 hover:text-blue-400"
               }`}
             >
               {task.completed ? (
-                <CheckCircle2 size={24} />
+                <CheckCircle2 size={20} />
               ) : (
-                <Circle size={24} />
+                <Circle size={20} />
               )}
             </button>
 
             <div className="flex-grow min-w-0">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 {getIcon(task.type)}
                 <StatusBadge
                   status={
                     task.completed
                       ? "completed"
-                      : timeSpent > 0
-                        ? "in-progress"
-                        : "pending"
+                      : "pending"
                   }
                 />
                 {task.priority && (
                   <span
                     className={`px-2 py-1 text-xs rounded-full border ${getPriorityColor(task.priority)}`}
                   >
-                    {task.priority} priority
+                    {task.priority}
                   </span>
                 )}
               </div>
@@ -172,7 +168,7 @@ export default function SchedulerCard({
                   href={task.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-lg font-semibold flex items-center gap-2 hover:text-blue-300 transition-colors group/link ${
+                  className={`text-base font-semibold flex items-center gap-2 hover:text-blue-300 transition-colors group/link ${
                     task.completed
                       ? "line-through text-neutral-500"
                       : "text-white"
@@ -180,30 +176,26 @@ export default function SchedulerCard({
                 >
                   {task.title}
                   <ExternalLink
-                    size={16}
+                    size={14}
                     className="opacity-0 group-hover/link:opacity-70 transition-opacity"
                   />
                 </a>
               ) : (
                 <h3
-                  className={`text-lg font-semibold ${task.completed ? "line-through text-neutral-500" : "text-white"}`}
+                  className={`text-base font-semibold ${task.completed ? "line-through text-neutral-500" : "text-white"}`}
                 >
                   {task.title}
                 </h3>
               )}
 
-              <div className="flex items-center gap-4 mt-3 text-sm text-neutral-400">
-                <div className="flex items-center gap-2">
-                  <Clock size={14} />
-                  <span>{task.time} estimated</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Timer size={14} />
-                  <span>{timeSpent}h spent</span>
+              <div className="flex items-center gap-4 mt-2 text-sm">
+                <div className="flex items-center gap-1 text-neutral-400">
+                  <Clock size={12} />
+                  <span>{task.time}</span>
                 </div>
                 {task.difficulty && (
-                  <div className="flex items-center gap-2">
-                    <Layers size={14} />
+                  <div className="flex items-center gap-1 text-neutral-400">
+                    <Layers size={12} />
                     <span>{task.difficulty}</span>
                   </div>
                 )}
@@ -211,19 +203,12 @@ export default function SchedulerCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-              title={isPlaying ? "Pause timer" : "Start timer"}
-            >
-              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </button>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setShowDetails(!showDetails)}
               className="p-2 rounded-lg bg-neutral-700/50 text-neutral-400 hover:bg-neutral-600/50 hover:text-white transition-all"
             >
-              <MoreHorizontal size={16} />
+              <MoreHorizontal size={14} />
             </button>
           </div>
         </div>
@@ -233,61 +218,107 @@ export default function SchedulerCard({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
+              className={`text-xs px-2 py-1 rounded-full transition-colors ${
                 showDetails
                   ? "bg-blue-500/20 text-blue-400"
                   : "bg-neutral-700/50 text-neutral-400 hover:text-blue-400"
               }`}
             >
-              {showDetails ? "Hide" : "Show"} Details
+              <div className="flex items-center gap-1">
+                <ChevronRight
+                  size={10}
+                  className={`transition-transform duration-300 ${showDetails ? "rotate-90" : ""}`}
+                />
+                {showDetails ? "Hide" : "Show"} Details
+              </div>
             </button>
             {task.reason && (
               <div className="flex items-center gap-1 text-xs text-blue-400">
-                <Bot size={12} />
-                <span>AI Recommended</span>
+                <Bot size={10} />
+                <span>AI</span>
               </div>
             )}
           </div>
 
           <button
-            onClick={() => onAddNote("")}
+            onClick={() => setShowNoteInput(true)}
             className="text-xs text-neutral-400 hover:text-green-400 transition-colors flex items-center gap-1"
           >
-            <FileText size={12} />
-            Add Note
+            <FileText size={10} />
+            Note
           </button>
         </div>
+
+        {/* Note input UI */}
+        {showNoteInput && (
+          <div className="mt-2">
+            <textarea
+              className="w-full p-2 rounded border border-neutral-700 bg-neutral-900 text-white text-xs"
+              rows={2}
+              value={noteValue}
+              onChange={e => setNoteValue(e.target.value)}
+              placeholder="Add a note..."
+            />
+            <div className="flex gap-2 mt-1">
+              <button
+                className="px-2 py-1 rounded bg-green-600 text-white text-xs"
+                onClick={() => {
+                  onAddNote(noteValue);
+                  setShowNoteInput(false);
+                }}
+              >
+                Save
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-neutral-700 text-white text-xs"
+                onClick={() => setShowNoteInput(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Show current note if exists */}
+        {task.note && !showNoteInput && (
+          <div className="mt-2 p-2 bg-blue-900/20 rounded text-xs text-blue-200">
+            <span className="font-semibold">Note:</span> {task.note}
+          </div>
+        )}
 
         {/* Expandable details section */}
         <AnimatePresence>
           {showDetails && (
             <motion.div
               initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 12 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              className="border-t border-neutral-700/50 pt-4"
+              className="border-t border-neutral-700/50 pt-3"
             >
               {task.reason && (
-                <div className="mb-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
                   <div className="flex items-start gap-2 text-sm">
-                    <Bot
-                      size={14}
-                      className="flex-shrink-0 mt-0.5 text-blue-400"
-                    />
+                    <div className="p-1 bg-blue-500/20 rounded">
+                      <Bot size={12} className="text-blue-400" />
+                    </div>
                     <div>
-                      <p className="text-blue-200/90 font-medium mb-1">
+                      <p className="text-blue-200 font-medium mb-1 flex items-center gap-1">
                         Why this task?
+                        <Target size={10} className="text-blue-400" />
                       </p>
-                      <p className="text-blue-200/70">{task.reason}</p>
+                      <p className="text-blue-200/80 text-xs leading-relaxed">
+                        {task.reason}
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
 
               {task.resources && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-neutral-300">
-                    Additional Resources:
+                <div className="mt-3 space-y-2">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-1">
+                    <Lightbulb size={12} className="text-yellow-400" />
+                    Resources:
                   </h4>
                   {task.resources.map((resource, i) => (
                     <a
@@ -295,11 +326,14 @@ export default function SchedulerCard({
                       href={resource.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                      className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors p-2 bg-blue-500/5 rounded border border-blue-500/20 group"
                     >
                       {getIcon(resource.type)}
                       <span>{resource.title}</span>
-                      <ExternalLink size={10} />
+                      <ExternalLink
+                        size={10}
+                        className="ml-auto opacity-50 group-hover:opacity-100"
+                      />
                     </a>
                   ))}
                 </div>
@@ -312,8 +346,8 @@ export default function SchedulerCard({
       {/* Highlighted card accent */}
       {isHighlighted && (
         <div className="absolute top-2 right-2">
-          <div className="p-1.5 bg-yellow-500/20 rounded-full">
-            <Lightbulb size={14} className="text-yellow-400" />
+          <div className="p-1 bg-yellow-500/20 rounded-full">
+            <Lightbulb size={12} className="text-yellow-400" />
           </div>
         </div>
       )}
