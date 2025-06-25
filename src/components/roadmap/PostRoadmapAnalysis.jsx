@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { CheckCircle2, ArrowRight, Award, Plus, Sparkles } from "lucide-react";
+import { CheckCircle2, ArrowRight, Award, Plus } from "lucide-react";
 
 export default function PostRoadmapAnalysis({ postAnalysis }) {
   return (
@@ -79,34 +79,6 @@ export default function PostRoadmapAnalysis({ postAnalysis }) {
                   </span>
                 </motion.div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Career Outcomes */}
-        <div className="mt-8 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-yellow-300 mb-4 flex items-center gap-2">
-            <Sparkles size={18} className="text-yellow-400" />
-            Potential Career Outcomes
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-400 mb-1">
-                $45-65K
-              </div>
-              <div className="text-sm text-yellow-200/80">
-                Entry-level Salary
-              </div>
-            </div>
-            <div className="text-center p-4 bg-orange-500/5 border border-orange-500/20 rounded-lg">
-              <div className="text-2xl font-bold text-orange-400 mb-1">85%</div>
-              <div className="text-sm text-orange-200/80">Job Market Fit</div>
-            </div>
-            <div className="text-center p-4 bg-green-500/5 border border-green-500/20 rounded-lg">
-              <div className="text-2xl font-bold text-green-400 mb-1">
-                6-12mo
-              </div>
-              <div className="text-sm text-green-200/80">Time to Hire</div>
             </div>
           </div>
         </div>
