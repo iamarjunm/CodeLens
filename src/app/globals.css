@@ -45,13 +45,3 @@
         .animate-data-flow-alt {
           animation: data-flow-alt 20s linear infinite;
         }
-
-        /* Generic Pulse for Hero Section Background Overlay - REMOVED
-        /*
-        @keyframes pulse-subtle {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 4s infinite ease-in-out;
-        } */
